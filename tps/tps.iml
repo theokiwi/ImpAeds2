@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q01" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q03" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q04" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q05" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q06" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q07" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q08" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q09" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q10" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q11" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q12" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q13" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q14" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q16" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q18" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tp1/JAVA/Q20" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
