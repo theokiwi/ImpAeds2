@@ -237,7 +237,7 @@ public class Show{
     }
 
     public static myQueue treatCast(String blockLine) {
-        myQueue queue = new myQueue(20);
+        myQueue queue = new myQueue(25);
         if (blockLine == null || blockLine.isEmpty() || blockLine.equals("NaN")) {
             return queue;
         }
@@ -263,7 +263,6 @@ public class Show{
         }
 
         queue.insert(cleaned);
-        queue.sort();
         return queue;
     }
 
@@ -525,10 +524,12 @@ class myQueue{
         return n == 0;
     }
 
+    //bubble sort
+    //a função positivo se items[j] é maior que items[j + 1]
     public void sort() {
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
-                if (items[j].compareToIgnoreCase(items[j + 1]) > 0) {
+                if (compareCase(items[j], items [j + 1])> 0) {
                     String temp = items[j];
                     items[j] = items[j + 1];
                     items[j + 1] = temp;
@@ -537,9 +538,30 @@ class myQueue{
         }
     }
 
+    public int compareCase(String a, String b){
+        int min = 0;
+        int answer = 0;
+        if(a.length() < b.length()){
+            min = a.length();
+        }else{
+            min = b.length();
+        }
+        for(int i = 0; i < min; i++){
+            char charA = Character.toLowerCase(a.charAt(i));
+            char charB = Character.toLowerCase(b.charAt(i));
+            if(charA != charB){
+                return charA - charB;
+            }
+        }
+
+        return a.length() - b.length();
+
+    }
+
 
 }
 
+//To usando object para dar pra converter para show, porque fosse string não ia dar
 class MyList {
     private Object[] elements;
     private int size;
