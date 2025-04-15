@@ -1,8 +1,9 @@
 import java.io.*;
 import java.util.Scanner;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-//TODO: Reorganizar codigo
-public class Show{
+class Show{
 
     private String show_id;
     private String title;
@@ -35,43 +36,6 @@ public class Show{
     }
 
 
-    public static void main(String[] args) {
-        String path = "/tmp/disneyplus.csv";
-        Scanner scanner = new Scanner(System.in);
-        MyList ids = new MyList();
-
-        // Ler IDs de entrada
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine().trim();
-            if (line.isEmpty()) break;
-            ids.add(line);
-        }
-        scanner.close();
-
-        try {
-            MyList showsList = new MyList();
-            Scanner rc = new Scanner(new File(path));
-            rc.nextLine(); // Pular cabeçalho
-            while (rc.hasNextLine()) {
-                String ogLine = rc.nextLine();
-                Show newShow = readShow(ogLine);
-                showsList.add(newShow);
-            }
-            rc.close();
-
-            // Buscar cada ID na lista de shows
-            for (int i = 0; i < ids.size(); i++) {
-                String id = (String) ids.get(i);
-                Show show = showsList.findByShowId(id);
-                if (show != null) {
-                    show.printShow();
-                }
-            }
-
-        } catch (FileNotFoundException e) {
-            System.err.println("Arquivo não encontrado: " + e.getMessage());
-        }
-    }
     public static Show readShow(String ogLine) {
         String[] collection = split(ogLine);
 
@@ -370,6 +334,14 @@ public class Show{
         this.listed_in = listed_in;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
 
 
 }
@@ -510,7 +482,7 @@ class myQueue{
 }
 
 //To usando object para dar pra converter para show, porque fosse string não ia dar
-class MyList {
+class MyList implements Iterable<Object>{
     private Object[] elements;
     private int size;
     private int max = 10;
@@ -555,5 +527,118 @@ class MyList {
             }
         }
         return null;
+    }
+
+    //Gambiarra pra ele me deixar usar o foreach
+    public Iterator<Object> iterator() {
+        return new Iterator<Object>() {
+            private int current = 0;
+            
+            @Override
+            public boolean hasNext() {
+                return current < size;
+            }
+            
+            @Override
+            public Object next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return elements[current++];
+            }
+        };
+    }
+}
+
+public class Pesquisa{
+    public static void main(String[] args) {
+        long inicio = System.nanoTime();
+        Show showObj = new Show();
+        String path = "/tmp/disneyplus.csv";
+        Scanner scanner = new Scanner(System.in);
+        MyList ids = new MyList();
+        boolean stop = false;
+        // le todos os ids até o FIM
+        while (!stop) {
+            String line = scanner.nextLine().trim();
+            if(!(line.equals("FIM"))){
+                if (line.isEmpty()) break;
+                ids.add(line);
+            }
+            else{
+                stop = true;
+            }
+        }
+
+        //Le os shows solicitados até o fim
+        MyList titles = new MyList();
+        boolean stop2 = false;
+        while(!stop2){
+            String line = scanner.nextLine().trim();
+            if(!(line.equals("FIM"))){
+                if (line.isEmpty()) break;
+                titles.add(line);
+            }
+            else{
+                stop2 = true;
+            }
+        }
+        scanner.close();
+
+        try {
+            //Coloca todos os shows existentes em uma lista
+            MyList showsList = new MyList();
+            Scanner rc = new Scanner(new File(path));
+            rc.nextLine(); 
+            while (rc.hasNextLine()) {
+                String ogLine = rc.nextLine();
+                Show newShow = showObj.readShow(ogLine);
+                showsList.add(newShow);
+            }
+            rc.close();
+
+            MyList choosenShows = new MyList();
+            //Adiciona os shows especificos em uma outra lista
+            for (int i = 0; i < ids.size(); i++) {
+                String id = (String) ids.get(i);
+                Show show = showsList.findByShowId(id);
+                if (show != null) {
+                     choosenShows.add(show);
+                }
+            }
+
+            //Pesquisa nessa lista se os titulos indicados estão presentes
+            for (Object obj : titles) {
+                String title = (String) obj;  // Converte o objeto para String
+                if (pesquisaSequencial(choosenShows, title) == true) {
+                     System.out.println("SIM");
+                } else {
+                     System.out.println("NAO");
+                }
+            }
+
+            long fim = System.nanoTime();
+            long duracao = fim - inicio;
+           //System.out.println( (duracao / 1_000_000.0));
+            
+        } catch (FileNotFoundException e) {
+            System.err.println("Arquivo não encontrado: " + e.getMessage());
+        }
+    }
+
+    static boolean pesquisaSequencial(MyList showItems, String title){
+        int comparacoes = 0;
+        int size = showItems.size();
+        for(int i = 0; i < size; i++){
+            Object obj = showItems.get(i);
+            Show currentShow = (Show) obj;
+            comparacoes++;
+            if(currentShow.getTitle().trim().equalsIgnoreCase(title.trim())){
+               return true;
+            }
+        }
+
+        //System.out.println(comparacoes);
+        return false;
     }
 }

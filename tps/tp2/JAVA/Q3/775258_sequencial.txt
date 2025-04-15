@@ -1,0 +1,3 @@
+775258 
+Tempo Exec: 326.756212 ms
+Num Comparações: 300
