@@ -1,7 +1,7 @@
 import java.io.*;
-import java.util.*;
 import java.util.Scanner;
 
+//TODO: Reorganizar codigo
 public class Show{
 
     private String show_id;
@@ -19,6 +19,7 @@ public class Show{
     public Show(){
 
     }
+    
     public Show(String show_id, String type, String title, String director, myQueue cast, String country, customDate date_added, int release_year, String rating, String duration, myQueue listed_in) {
         this.show_id = show_id;
         this.title = title;
@@ -32,6 +33,7 @@ public class Show{
         this.duration = duration;
         this.listed_in = listed_in;
     }
+
 
     public static void main(String[] args) {
         String path = "/tmp/disneyplus.csv";
@@ -74,9 +76,9 @@ public class Show{
         String[] collection = split(ogLine);
 
         collection = nullTreatment(collection);
-        collection = removeQuotesFromAll(collection); // <-- Adicione isso aqui
+        collection = removeQuotesFromAll(collection);
 
-        myQueue cast = treatCast(collection[4]); // era collection[3], mas cast é o campo 4
+        myQueue cast = treatCast(collection[4]);
         myQueue listed_in = treatListedIn(collection[10]);
         customDate date = dateTreatment(collection[6]);
         Show builtShow = new Show();
@@ -91,7 +93,7 @@ public class Show{
                 collection[1],  // title
                 collection[2],  // type
                 collection[3],  // director
-                cast,           // cast --> DEVERIA vir de collection[4]
+                cast,           // cast 
                 collection[5],  // country
                 date_added,     // date_added
                 Integer.parseInt(collection[7]), // release_year
@@ -134,9 +136,13 @@ public class Show{
         for (int i = 0; i < collection.length; i++) {
             if (collection[i] != null) {
                 collection[i] = collection[i].trim();
-                if (collection[i].startsWith("\"") && collection[i].endsWith("\"")) {
-                    collection[i] = collection[i].substring(1, collection[i].length() - 1);
+                String replacement = "";
+                for (int j = 0; j < collection[i].length(); j++) {
+                    if (collection[i].charAt(j) != '\"') {
+                        replacement += collection[i].charAt(j);
+                    }
                 }
+                collection[i] = replacement;
             }
         }
         return collection;
@@ -145,7 +151,6 @@ public class Show{
 
     public static String pieceString(String ogLine, int start, int end){
         String answer = "";
-        int j = 0;
         for(int i = start; i < end; i++){
             char currentChar = ogLine.charAt(i);
             answer += currentChar;
@@ -162,33 +167,6 @@ public class Show{
 
         return collection;
     }
-
-    public static myQueue treatQuotes(String blockLine) {
-        myQueue queue = new myQueue(20);
-
-        if (!blockLine.contains(",") && !blockLine.contains("\"")) {
-            queue.insert(blockLine);
-            return queue;
-        }
-
-        boolean group = false;
-        int pieceStart = 0;
-        for (int i = 0; i < blockLine.length(); i++) {
-            char currentChar = blockLine.charAt(i);
-
-            if ((currentChar == '"' || currentChar == ',') && !group) {
-                pieceStart = i + 1;
-                group = true;
-            }
-            else if ((currentChar == '"' || currentChar == ',') && group) {
-                String toAdd = pieceString(blockLine, pieceStart, i);
-                queue.insert(toAdd);
-                group = false;
-            }
-        }
-        return queue;
-    }
-
 
     //"September 24, 2021"
     public static customDate dateTreatment(String blockLine) {
@@ -242,10 +220,7 @@ public class Show{
             return queue;
         }
 
-        String cleaned = blockLine.replaceAll("\"", "").trim();
-
-        String[] actors = cleaned.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-
+        String[] actors = blockLine.split(",");
         for (String actor : actors) {
             queue.insert(actor.trim());
         }
@@ -254,40 +229,33 @@ public class Show{
         return queue;
     }
 
-    public static myQueue treatListedIn(String blockLine) {
-        myQueue queue = new myQueue(1);
-        String cleaned = blockLine.trim();
+  public static myQueue treatListedIn(String blockLine) {
+      myQueue queue = new myQueue(25);
+      if (blockLine == null || blockLine.isEmpty() || blockLine.equals("NaN")) {
+          return queue;
+      }
 
-        if (cleaned.startsWith("\"") && cleaned.endsWith("\"")) {
-            cleaned = cleaned.substring(1, cleaned.length() - 1);
-        }
+      String[] genres = blockLine.split(",");
+      for (String genre : genres) {
+          queue.insert(genre.trim());
+      }
 
-        queue.insert(cleaned);
-        return queue;
-    }
+      return queue;
+  }
 
     public void printShow() {
         // Verificar campos String e substituir vazios/NaN
         String id = safeString(show_id);
-        id = removeQuotes(id);
         String titulo = safeString(title);
-        titulo = removeQuotes(titulo);
         String tipo = safeString(type);
-        tipo = removeQuotes(tipo);
         String diretor = safeString(director);
-        diretor = removeQuotes(diretor);
         String pais = safeString(country);
-        pais = removeQuotes(pais);
         String classificacao = safeString(rating);
-        classificacao = removeQuotes(classificacao);
         String duracao = safeString(duration);
-        duracao = removeQuotes(duracao);
 
         // Verificar filas e datas
         String elenco = safeQueueCast(cast); // sem colchetes
-        elenco = removeQuotes(elenco);
         String categorias = safeQueueListedIn(listed_in); // com colchetes
-        categorias = removeQuotes(categorias);
 
         String data = (date_added == null) ? "NaN" : date_added.show();
 
@@ -298,15 +266,6 @@ public class Show{
         System.out.println();
     }
 
-    public String removeQuotes(String value){
-        String copy = "";
-        for(int i = 0; i < value.length(); i++){
-            if(value.charAt(i) != '"'){
-                copy += value.charAt(i);
-            }
-        }
-        return copy;
-    }
     public String safeString(String value) {
         return (value == null || value.isEmpty() || value.equals("NaN") || value.equals("[NaN]")) ? "NaN" : value;
     }
@@ -331,16 +290,6 @@ public class Show{
         return content.equals("[]") ? "[NaN]" : content;
     }
 
-
-    public String safeQueue(myQueue queue) {
-        if (queue == null || queue.isEmpty()) {
-            return "NaN";
-        }
-
-        // Verificar se todos os elementos são vazios
-        String content = queue.show();
-        return content.equals("[]") ? "NaN" : content;
-    }
     public String getShow_id() {
         return show_id;
     }
@@ -421,7 +370,6 @@ public class Show{
         this.listed_in = listed_in;
     }
 
-    //Gets e Setter abaixo
 
 
 }
@@ -466,7 +414,6 @@ class customDate {
         this.year = year;
     }
 
-    //=> s441 ## Maggie Simpson in The Longest Daycare ## Movie ## NaN ## [NaN] ## United States ## May 29, 2020 ## 2012 ## PG ## 5 min ## [Animation, Comedy] ##
     public String show(){
         return (" " + month + " " + day + ", " + year);
     }
@@ -546,6 +493,7 @@ class myQueue{
         }else{
             min = b.length();
         }
+
         for(int i = 0; i < min; i++){
             char charA = Character.toLowerCase(a.charAt(i));
             char charB = Character.toLowerCase(b.charAt(i));
