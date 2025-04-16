@@ -335,45 +335,42 @@ void printShow(Show* show) {
     free(date);
 }
 
-//Ordenar o array antes da pesquisa binaria
-MyList* selecaoRec(MyList* choosenList){
-    int size = listSize(choosenList);
-    for(int i = 0; i < size; i++){
-        int min = i;
-        for(int j = i + 1; j < size; j++){
-            if(strcmp(choosenList->items[min]->title, choosenList->items[j]->title) > 0){
-                min = j;
-            }
-        }
-
-        if (min != i) {
-            Show* temp = choosenList->items[i];
-            choosenList->items[i] = choosenList->items[min];
-            choosenList->items[min] = temp;
-        }
-    }
-
-    return choosenList;
+int findMinIndex(MyList* choosenList, int min, int j);
+MyList* selecaoRecHelper(MyList* choosenList, int i);
+MyList* selecaoRec(MyList* choosenList) {
+    return selecaoRecHelper(choosenList, 0);
 }
 
-//Fiz iterativa porque recursiva eu ia ter que ficar passando muito parametro
-int pesquisaBinaria(char* title, MyList* choosenList){ 
-    int esq = 0;
-    int dir = listSize(choosenList) - 1;
-    int meio = 0;
-
-    while(esq <= dir){
-        meio = (esq + dir)/2;
-        if(strcmp(title, choosenList->items[meio]->title) == 0){
-            return 0;
-        }else if(strcmp(title, choosenList->items[meio]->title) < 0){
-            dir = meio - 1;
-        }else{
-            esq = meio + 1;
-        }
+MyList* selecaoRecHelper(MyList* choosenList, int i) {
+    int size = listSize(choosenList);
+    
+    if (i >= size - 1) {
+        return choosenList;
     }
+    
+    int min = findMinIndex(choosenList, i, i+1);
+    
+    if (min != i) {
+        Show* temp = choosenList->items[i];
+        choosenList->items[i] = choosenList->items[min];
+        choosenList->items[min] = temp;
+    }
+    
+    return selecaoRecHelper(choosenList, i + 1);
+}
 
-    return 1;
+int findMinIndex(MyList* choosenList, int min, int j) {
+    int size = listSize(choosenList);
+    
+    if (j >= size) {
+        return min;
+    }
+    
+    if (strcmp(choosenList->items[min]->title, choosenList->items[j]->title) > 0) {
+        min = j;
+    }
+    
+    return findMinIndex(choosenList, min, j + 1);
 }
 
 int main() {
@@ -401,13 +398,6 @@ int main() {
         idList[idCount++] = strdup(id);
     }
 
-    //Recebe todos os titles
-    char title[300];
-    char** titleList = (char**)malloc(2000 * sizeof(char*));
-    int titleCount = 0;
-    while(scanf(" %[^\n]", title) == 1 && strcmp(title, "FIM") != 0){
-        titleList[titleCount++] = strdup(title);
-    }
 
     //Cria uma lista só com os shows selecionados
     MyList* choosenShows = initList(1000);
@@ -423,21 +413,15 @@ int main() {
     free(idList);
 
 
-    //Ordena a lista de titles em ordem alfabetica
+    //Ordena a lista de titles em ordem alfabetica 
     choosenShows = selecaoRec(choosenShows);
 
     //Faz a pesquisa binaria de titles na lista de items com o id escolhido
-    for(int f = 0; f < titleCount; f++){
-        if(pesquisaBinaria(titleList[f], choosenShows) == 0){
-            printf("SIM\n");
-        }
-        else{
-            printf("NAO\n");
-        }
+    for(int f = 0; f < choosenShows->n; f++){
+        printShow(choosenShows->items[f]);
     }
 
     //Liberar titleList
-    free(titleList);
     free(choosenShows->items);
     free(choosenShows);
     freeList(showList);
