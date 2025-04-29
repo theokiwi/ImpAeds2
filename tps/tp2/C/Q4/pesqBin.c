@@ -336,7 +336,7 @@ void printShow(Show* show) {
 }
 
 //Ordenar o array antes da pesquisa binaria
-MyList* selecaoRec(MyList* choosenList){
+MyList* shellsort(MyList* choosenList){
     int size = listSize(choosenList);
     for(int i = 0; i < size; i++){
         int min = i;
@@ -424,7 +424,7 @@ int main() {
 
 
     //Ordena a lista de titles em ordem alfabetica
-    choosenShows = selecaoRec(choosenShows);
+    choosenShows = shellsort(choosenShows);
 
     //Faz a pesquisa binaria de titles na lista de items com o id escolhido
     for(int f = 0; f < titleCount; f++){

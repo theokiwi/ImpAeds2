@@ -122,9 +122,9 @@ class Show{
         return answer;
     }
 
-    public static String[] nullTreatment(String[] collection){
-        for(int i = 0; i < collection.length; i++){
-            if(collection[i] == null){
+    public static String[] nullTreatment(String[] collection) {
+        for (int i = 0; i < collection.length; i++) {
+            if (collection[i] == null || collection[i].equals("")) {
                 collection[i] = "NaN";
             }
         }

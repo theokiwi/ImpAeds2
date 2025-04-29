@@ -1,8 +1,10 @@
+
 import java.io.*;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-//TODO: Reorganizar codigo
-public class Show{
+class Show {
 
     private String show_id;
     private String title;
@@ -16,10 +18,10 @@ public class Show{
     private String duration;
     private myQueue listed_in;
 
-    public Show(){
+    public Show() {
 
     }
-    
+
     public Show(String show_id, String type, String title, String director, myQueue cast, String country, customDate date_added, int release_year, String rating, String duration, myQueue listed_in) {
         this.show_id = show_id;
         this.title = title;
@@ -34,44 +36,6 @@ public class Show{
         this.listed_in = listed_in;
     }
 
-
-    public static void main(String[] args) {
-        String path = "/tmp/disneyplus.csv";
-        Scanner scanner = new Scanner(System.in);
-        MyList ids = new MyList();
-
-        // Ler IDs de entrada
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine().trim();
-            if (line.isEmpty()) break;
-            ids.add(line);
-        }
-        scanner.close();
-
-        try {
-            MyList showsList = new MyList();
-            Scanner rc = new Scanner(new File(path));
-            rc.nextLine(); // Pular cabeçalho
-            while (rc.hasNextLine()) {
-                String ogLine = rc.nextLine();
-                Show newShow = readShow(ogLine);
-                showsList.add(newShow);
-            }
-            rc.close();
-
-            // Buscar cada ID na lista de shows
-            for (int i = 0; i < ids.size(); i++) {
-                String id = (String) ids.get(i);
-                Show show = showsList.findByShowId(id);
-                if (show != null) {
-                    show.printShow();
-                }
-            }
-
-        } catch (FileNotFoundException e) {
-            System.err.println("Arquivo não encontrado: " + e.getMessage());
-        }
-    }
     public static Show readShow(String ogLine) {
         String[] collection = split(ogLine);
 
@@ -86,20 +50,19 @@ public class Show{
 
         return builtShow;
     }
-
     public static Show showBuild(String[] collection, myQueue cast, myQueue listed_in, customDate date_added) {
         Show newShow = new Show(
-                collection[0],  // show_id
-                collection[1],  // title
-                collection[2],  // type
-                collection[3],  // director
-                cast,           // cast 
-                collection[5],  // country
-                date_added,     // date_added
+                collection[0], // show_id
+                collection[1], // title
+                collection[2], // type
+                collection[3], // director
+                cast, // cast 
+                collection[5], // country
+                date_added, // date_added
                 Integer.parseInt(collection[7]), // release_year
-                collection[8],  // rating
-                collection[9],  // duration
-                listed_in       // listed_in
+                collection[8], // rating
+                collection[9], // duration
+                listed_in // listed_in
         );
         return newShow;
     }
@@ -148,10 +111,9 @@ public class Show{
         return collection;
     }
 
-
-    public static String pieceString(String ogLine, int start, int end){
+    public static String pieceString(String ogLine, int start, int end) {
         String answer = "";
-        for(int i = start; i < end; i++){
+        for (int i = start; i < end; i++) {
             char currentChar = ogLine.charAt(i);
             answer += currentChar;
         }
@@ -170,8 +132,8 @@ public class Show{
 
     //"September 24, 2021"
     public static customDate dateTreatment(String blockLine) {
-        if (blockLine == null || blockLine.isEmpty() || blockLine.equals("\"\"")) {
-            return null;
+        if (blockLine == null || blockLine.isEmpty() || blockLine.equals("\"\"") || blockLine.equals("NaN")) {
+            return new customDate("March", 1, 1900);
         }
 
         int start = 0;
@@ -229,26 +191,26 @@ public class Show{
         return queue;
     }
 
-  public static myQueue treatListedIn(String blockLine) {
-      myQueue queue = new myQueue(25);
-      if (blockLine == null || blockLine.isEmpty() || blockLine.equals("NaN")) {
-          return queue;
-      }
+    public static myQueue treatListedIn(String blockLine) {
+        myQueue queue = new myQueue(25);
+        if (blockLine == null || blockLine.isEmpty() || blockLine.equals("NaN")) {
+            return queue;
+        }
 
-      String[] genres = blockLine.split(",");
-      for (String genre : genres) {
-          queue.insert(genre.trim());
-      }
+        String[] genres = blockLine.split(",");
+        for (String genre : genres) {
+            queue.insert(genre.trim());
+        }
 
-      return queue;
-  }
+        return queue;
+    }
 
     public void printShow() {
         // Verificar campos String e substituir vazios/NaN
         String id = safeString(show_id);
         String titulo = safeString(title);
         String tipo = safeString(type);
-        String diretor = safeString(director);
+        //String diretor = safeString(director);
         String pais = safeString(country);
         String classificacao = safeString(rating);
         String duracao = safeString(duration);
@@ -259,7 +221,7 @@ public class Show{
 
         String data = (date_added == null) ? "NaN" : date_added.show();
 
-        System.out.print("=> " + id + " ## " + titulo + " ## " + tipo + " ## " + diretor + " ## "
+        System.out.print("=> " + id + " ## " + titulo + " ## " + tipo + " ## " + director + " ## "
                 + elenco + " ## " + pais + " ##" + data + " ## "
                 + release_year + " ## " + classificacao + " ## " + duracao + " ## "
                 + categorias + " ##");
@@ -276,10 +238,11 @@ public class Show{
         }
 
         String content = queue.show();
-        if (content.equals("[]")) return "[NaN]";
+        if (content.equals("[]")) {
+            return "[NaN]";
+        }
         return "[" + content.substring(1, content.length() - 1) + "]";
     }
-
 
     public String safeQueueListedIn(myQueue queue) {
         if (queue == null || queue.isEmpty()) {
@@ -370,17 +333,24 @@ public class Show{
         this.listed_in = listed_in;
     }
 
+    public String getTitle() {
+        return title;
+    }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
 }
 
 //Formato Data: September 24, 2021
 class customDate {
+
     private String month;
     private int day;
     private int year;
 
-    public customDate(){
+    public customDate() {
 
     }
 
@@ -414,39 +384,40 @@ class customDate {
         this.year = year;
     }
 
-    public String show(){
+    public String show() {
         return (" " + month + " " + day + ", " + year);
     }
 }
 
-class myQueue{
+class myQueue {
+
     private int n;
     private int max;
     private String[] items;
 
-    public myQueue(int max){
+    public myQueue(int max) {
         this.max = max;
         this.n = 0;
         this.items = new String[max];
     }
 
-    public void insert(String elem){
-        if(n >= max) {
+    public void insert(String elem) {
+        if (n >= max) {
             System.out.println("Fila Cheia no Inserir de " + elem);
         }
         items[n++] = elem;
     }
 
-    public String remove(){
-     if(n == 0){
-         System.out.println("Fila Vazia no Remover Fim");
-     }
-     String removed = items[0];
-     for(int i = 0; i < n; i++){
-         items[i] = items[i++];
-     }
-     n--;
-     return removed;
+    public String remove() {
+        if (n == 0) {
+            System.out.println("Fila Vazia no Remover Fim");
+        }
+        String removed = items[0];
+        for (int i = 0; i < n; i++) {
+            items[i] = items[i++];
+        }
+        n--;
+        return removed;
     }
 
     //[Kamran Lucas, Nathaniel Potvin, Pearce Joza, Raymond Cham]
@@ -476,7 +447,7 @@ class myQueue{
     public void sort() {
         for (int i = 0; i < n - 1; i++) {
             for (int j = 0; j < n - i - 1; j++) {
-                if (compareCase(items[j], items [j + 1])> 0) {
+                if (compareCase(items[j], items[j + 1]) > 0) {
                     String temp = items[j];
                     items[j] = items[j + 1];
                     items[j + 1] = temp;
@@ -485,19 +456,19 @@ class myQueue{
         }
     }
 
-    public int compareCase(String a, String b){
+    public int compareCase(String a, String b) {
         int min = 0;
         int answer = 0;
-        if(a.length() < b.length()){
+        if (a.length() < b.length()) {
             min = a.length();
-        }else{
+        } else {
             min = b.length();
         }
 
-        for(int i = 0; i < min; i++){
+        for (int i = 0; i < min; i++) {
             char charA = Character.toLowerCase(a.charAt(i));
             char charB = Character.toLowerCase(b.charAt(i));
-            if(charA != charB){
+            if (charA != charB) {
                 return charA - charB;
             }
         }
@@ -506,11 +477,11 @@ class myQueue{
 
     }
 
-
 }
 
 //To usando object para dar pra converter para show, porque fosse string não ia dar
-class MyList {
+class MyList implements Iterable<Object> {
+
     private Object[] elements;
     private int size;
     private int max = 10;
@@ -556,5 +527,164 @@ class MyList {
         }
         return null;
     }
+
+    public void changeElements(int index1, int index2) {
+        Object temp = elements[index1];
+        elements[index1] = elements[index2];
+        elements[index2] = temp;
+    }
+
+    //Gambiarra pra ele me deixar usar o foreach
+    public Iterator<Object> iterator() {
+        return new Iterator<Object>() {
+            private int current = 0;
+
+            @Override
+            public boolean hasNext() {
+                return current < size;
+            }
+
+            @Override
+            public Object next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return elements[current++];
+            }
+        };
+    }
 }
 
+public class Heapsort {
+
+    public static void main(String[] args) {
+        long inicio = System.nanoTime();
+        Show showObj = new Show();
+        String path = "/tmp/disneyplus.csv";
+        Scanner scanner = new Scanner(System.in);
+        MyList ids = new MyList();
+        boolean stop = false;
+        // le todos os ids até o FIM
+        while (!stop) {
+            String line = scanner.nextLine().trim();
+            if (!(line.equals("FIM"))) {
+                if (line.isEmpty()) {
+                    break;
+                }
+                ids.add(line);
+            } else {
+                stop = true;
+            }
+        }
+
+        try {
+            //Coloca todos os shows existentes em uma lista
+            MyList showsList = new MyList();
+            Scanner rc = new Scanner(new File(path));
+            rc.nextLine();
+            while (rc.hasNextLine()) {
+                String ogLine = rc.nextLine();
+                Show newShow = showObj.readShow(ogLine);
+                showsList.add(newShow);
+            }
+            rc.close();
+
+            MyList choosenShows = new MyList();
+            //Adiciona os shows especificos em uma outra lista
+            for (int i = 0; i < ids.size(); i++) {
+                String id = (String) ids.get(i);
+                Show show = showsList.findByShowId(id);
+                if (show != null) {
+                    choosenShows.add(show);
+                }
+            }
+
+            choosenShows = ordenacaoHeapsort(choosenShows);
+            for (Object obj : choosenShows) {
+                Show s = (Show) obj;
+                s.printShow();
+            }
+
+            long fim = System.nanoTime();
+            long duracao = fim - inicio;
+            //System.out.println( (duracao / 1_000_000.0));
+
+        } catch (FileNotFoundException e) {
+            System.err.println("Arquivo não encontrado: " + e.getMessage());
+        }
+    }
+    public static void swap(int index1, int index2, Show[] array){
+        Show temp = array[index1];
+        array[index1] = array[index2];
+        array[index2] = temp;
+    }
+
+    //Se é maior que o pai troca com o pai 
+   public static void construir(int tamHeap, Show[] array) {
+    for (int i = tamHeap; (i > 1) && 
+         (array[i].getDirector().compareTo(array[i/2].getDirector()) > 0 
+          || (array[i].getDirector().compareTo(array[i/2].getDirector()) == 0 
+              && array[i].getTitle().compareTo(array[i/2].getTitle()) > 0)); 
+         i /= 2) {
+        swap(i, i/2, array);
+    }
+}
+
+    public static int getMaiorFilho(int i, int tamHeap, Show[] array) {
+        if (2*i == tamHeap
+            || array[2*i].getDirector().compareTo(array[2*i + 1].getDirector()) > 0
+            || (array[2*i].getDirector().compareTo(array[2*i + 1].getDirector()) == 0
+                && array[2*i].getTitle().compareTo(array[2*i + 1].getTitle()) > 0)
+        ) {
+            return 2*i;
+        } else {
+            return 2*i + 1;
+        }
+    }
+    
+
+    public static void reconstruir(int tamHeap, Show[] array){
+        int i = 1;
+        while(i <= tamHeap/2){
+            int filho = getMaiorFilho(i, tamHeap, array);
+            if ((array[i].getDirector().compareTo(array[filho].getDirector()) < 0 )|| 
+            (array[i].getDirector().compareTo(array[filho].getDirector()) == 0 && 
+             array[i].getTitle().compareTo(array[filho].getTitle()) < 0)) {
+            swap(i, filho, array);
+            i = filho;
+        }else{
+            i = tamHeap; 
+        }
+        
+        }
+    }
+
+    public static MyList ordenacaoHeapsort(MyList lista) {
+        int n = lista.size();
+        Show[] heap = new Show[n + 1];
+
+        for(int i = 0; i < n; i++){
+            heap[i + 1] = (Show) lista.get(i);
+        }
+
+        //Constroí o heap
+        for(int tamHeap = 2; tamHeap <= n; tamHeap++){
+            construir(tamHeap, heap);
+        }
+
+        //Ordenacao
+        int tamHeap = n;
+        while(tamHeap > 1){
+            swap(1, tamHeap--, heap);
+            reconstruir(tamHeap, heap);
+        }
+
+        MyList listaOrdenada = new MyList();
+        for (int i = 1; i <= n; i++) {
+            listaOrdenada.add(heap[i]);
+        }
+    
+        return listaOrdenada;
+        
+    }
+}

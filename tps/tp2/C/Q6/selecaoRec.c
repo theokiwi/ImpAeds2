@@ -337,7 +337,7 @@ void printShow(Show* show) {
 
 int findMinIndex(MyList* choosenList, int min, int j);
 MyList* selecaoRecHelper(MyList* choosenList, int i);
-MyList* selecaoRec(MyList* choosenList) {
+MyList* shellsort(MyList* choosenList) {
     return selecaoRecHelper(choosenList, 0);
 }
 
@@ -414,7 +414,7 @@ int main() {
 
 
     //Ordena a lista de titles em ordem alfabetica 
-    choosenShows = selecaoRec(choosenShows);
+    choosenShows = shellsort(choosenShows);
 
     //Faz a pesquisa binaria de titles na lista de items com o id escolhido
     for(int f = 0; f < choosenShows->n; f++){
