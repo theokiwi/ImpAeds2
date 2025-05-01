@@ -248,12 +248,15 @@ char** split(const char* ogLine) {
     return collection;
 }
 
-MyDate* dateTreatment(const char* dateStr) {
-    if (strcmp(dateStr, "NaN") == 0) return NULL;
-    
+MyDate *dateTreatment(const char *dateStr)
+{
+    if (strcmp(dateStr, "NaN") == 0)
+        return initDate("March", 1, 1900);
+
     char month[20];
     int day, year;
-    if (sscanf(dateStr, "%s %d, %d", month, &day, &year) == 3) {
+    if (sscanf(dateStr, "%s %d, %d", month, &day, &year) == 3)
+    {
         return initDate(month, day, year);
     }
     return NULL;

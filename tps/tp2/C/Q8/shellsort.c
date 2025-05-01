@@ -302,7 +302,7 @@ char **split(const char *ogLine)
 MyDate *dateTreatment(const char *dateStr)
 {
     if (strcmp(dateStr, "NaN") == 0)
-        return NULL;
+        return initDate("March", 1, 1900);
 
     char month[20];
     int day, year;
@@ -340,8 +340,8 @@ Show *readShow(const char *ogLine)
 
     Show *show = initShow();
     show->show_id = strdup(collection[0]);
-    show->type = strdup(collection[1]);  // Corrigido: agora type vem da coluna 2
-    show->title = strdup(collection[2]); // Corrigido: title vem da coluna 3
+    show->type = strdup(collection[1]);  
+    show->title = strdup(collection[2]); 
     show->director = strdup(collection[3]);
     freeQueue(show->cast);
     show->cast = treatList(collection[4]);
@@ -410,7 +410,7 @@ MyList *insercaoPorCor(MyList *choosenList, int cor, int h)
     return choosenList;
 }
 
-MyList *shellsort(MyList *choosenList)
+MyList *quicksort(MyList *choosenList)
 {
     int h = 1;
     do
@@ -479,7 +479,7 @@ int main()
     free(idList);
 
     // Ordena a lista de titles em ordem alfabetica
-    choosenShows = shellsort(choosenShows);
+    choosenShows = quicksort(choosenShows);
 
     // Faz a pesquisa binaria de titles na lista de items com o id escolhido
     for (int f = 0; f < choosenShows->n; f++)

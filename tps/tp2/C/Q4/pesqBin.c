@@ -252,12 +252,15 @@ char** split(const char* ogLine) {
     return collection;
 }
 
-MyDate* dateTreatment(const char* dateStr) {
-    if (strcmp(dateStr, "NaN") == 0) return NULL;
-    
+MyDate *dateTreatment(const char *dateStr)
+{
+    if (strcmp(dateStr, "NaN") == 0)
+        return initDate("March", 1, 1900);
+
     char month[20];
     int day, year;
-    if (sscanf(dateStr, "%s %d, %d", month, &day, &year) == 3) {
+    if (sscanf(dateStr, "%s %d, %d", month, &day, &year) == 3)
+    {
         return initDate(month, day, year);
     }
     return NULL;
@@ -336,7 +339,7 @@ void printShow(Show* show) {
 }
 
 //Ordenar o array antes da pesquisa binaria
-MyList* shellsort(MyList* choosenList){
+MyList* quicksort(MyList* choosenList){
     int size = listSize(choosenList);
     for(int i = 0; i < size; i++){
         int min = i;
@@ -424,7 +427,7 @@ int main() {
 
 
     //Ordena a lista de titles em ordem alfabetica
-    choosenShows = shellsort(choosenShows);
+    choosenShows = quicksort(choosenShows);
 
     //Faz a pesquisa binaria de titles na lista de items com o id escolhido
     for(int f = 0; f < titleCount; f++){

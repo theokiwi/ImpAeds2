@@ -338,43 +338,78 @@ void printShow(Show* show) {
     free(date);
 }
 
-int findMinIndex(MyList* choosenList, int min, int j);
-MyList* selecaoRecHelper(MyList* choosenList, int i);
-MyList* quicksort(MyList* choosenList) {
-    return selecaoRecHelper(choosenList, 0);
+int month_to_int(char* month) {
+const char *months[] = {
+"january","february","march","april","may","june",
+"july","august","september","october","november","december"
+};
+char buf[16];
+for (int i = 0; month[i] && i < 15; i++)
+buf[i] = tolower((unsigned char)month[i]);
+buf[strlen(month)] = '\0';
+
+for (int i = 0; i < 12; i++) {
+    if (strcmp(buf, months[i]) == 0)
+        return i + 1;
+}
+return 0; 
 }
 
-MyList* selecaoRecHelper(MyList* choosenList, int i) {
-    int size = listSize(choosenList);
-    
-    if (i >= size - 1) {
-        return choosenList;
+//maior que zero se d1 eh mais recente
+//menor que zero se d2 eh mais recente
+//0 se eh igual
+int compareDate(Show* show1, Show* show2){
+    int retorno = 0;
+    if(show1->date_added->year != show2->date_added->year){
+        retorno = show1->date_added->year - show2->date_added->year;
+    }else if(show1->date_added->year  == show2->date_added->year){
+        int m1 = month_to_int(show1->date_added->month);
+        int m2 = month_to_int(show2->date_added->month);
+        if(m1 != m2){
+            retorno = m1 - m2;
+        }
+        else if(show1->date_added->day != show2->date_added->day){
+            retorno = show1->date_added->day - show2->date_added->day;
+        }
+        else{
+            retorno = (compareCase(show1->title, show2->title));
+        }
     }
-    
-    int min = findMinIndex(choosenList, i, i+1);
-    
-    if (min != i) {
-        Show* temp = choosenList->items[i];
-        choosenList->items[i] = choosenList->items[min];
-        choosenList->items[min] = temp;
-    }
-    
-    return selecaoRecHelper(choosenList, i + 1);
+
+    return retorno;
 }
 
-int findMinIndex(MyList* choosenList, int min, int j) {
-    int size = listSize(choosenList);
-    
-    if (j >= size) {
-        return min;
-    }
-    
-    if (strcmp(choosenList->items[min]->title, choosenList->items[j]->title) > 0) {
-        min = j;
-    }
-    
-    return findMinIndex(choosenList, min, j + 1);
+void quicksort(MyList* choosenList);
+void quicksortRec(MyList* choosenList, int esq, int dir);
+//dateAdded desempate title
+void quicksort(MyList* choosenList) {
+    quicksortRec(choosenList, 0, choosenList->n - 1);
 }
+
+void quicksortRec(MyList* choosenList, int esq, int dir){
+    int i = esq, j = dir;
+    Show* pivo = choosenList->items[(dir + esq)/2];
+    while(i <= j){
+        while(compareDate(choosenList->items[i], pivo) < 0) i++;
+         while(compareDate(choosenList->items[j], pivo) > 0) j--;
+        if(i <= j){
+            Show* temp = choosenList->items[i];
+            choosenList->items[i] = choosenList->items[j];
+            choosenList->items[j] = temp;
+            i++;
+            j--;
+        }
+    }
+
+    if(esq < j){
+        quicksortRec(choosenList, esq, j);
+    }
+    if(i < dir){
+        quicksortRec(choosenList, i, dir);
+    }
+    
+}
+
 
 int main() {
     MyList* showList = initList(1000);
@@ -416,8 +451,8 @@ int main() {
     free(idList);
 
 
-    //Ordena a lista de titles em ordem alfabetica 
-    choosenShows = quicksort(choosenShows);
+    //Ordena a lista de titles por data e dps ti
+    quicksort(choosenShows);
 
     //Faz a pesquisa binaria de titles na lista de items com o id escolhido
     for(int f = 0; f < choosenShows->n; f++){

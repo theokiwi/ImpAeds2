@@ -134,8 +134,8 @@ class Show{
 
     //"September 24, 2021"
     public static customDate dateTreatment(String blockLine) {
-        if (blockLine == null || blockLine.isEmpty() || blockLine.equals("\"\"")) {
-            return null;
+        if (blockLine == null || blockLine.isEmpty() || blockLine.equals("\"\"") || blockLine.equals("NaN")) {
+            return new customDate("March", 1, 1900);
         }
 
         int start = 0;
