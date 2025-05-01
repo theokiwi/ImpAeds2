@@ -498,6 +498,12 @@ class MyList implements Iterable<Object> {
         elements[size++] = element;
     }
 
+    public void set(int index, Object element) {
+        if(index >= 0 && index < size){
+            elements[index] = element;
+        }
+    }
+
     public void removeByIndex(int index) {
         if (index >= 0 && index < size) {
             for (int i = index; i < size - 1; i++) {
@@ -576,7 +582,7 @@ class MyList implements Iterable<Object> {
     }
 }
 
-public class Countingsort {
+public class Mergesort {
 
     public static void main(String[] args) {
         long inicio = System.nanoTime();
@@ -620,8 +626,7 @@ public class Countingsort {
                 }
             }
 
-            int[] ordenadoArray = countingsort(choosenShows);
-            choosenShows = auxFix(ordenadoArray, choosenShows);
+            mergesort(choosenShows, 0, choosenShows.size() - 1);
             for (Object obj : choosenShows) {
                 Show s = (Show) obj;
                 s.printShow();
@@ -635,104 +640,85 @@ public class Countingsort {
             System.err.println("Arquivo não encontrado: " + e.getMessage());
         }
     }
-    public static void swap(int index1, int index2, Show[] array){
-        Show temp = array[index1];
-        array[index1] = array[index2];
-        array[index2] = temp;
+    public static int arrayParaNumero(int[] array) {
+        int numero = 0;
+    
+        for (int i = 0; i < array.length; i++) {
+            numero = numero * 10 + array[i];
+        }
+    
+        return numero;
     }
 
-    public static int getMaior(MyList lista){
-        Object inicial = lista.get(0);
-        Show show = (Show) inicial;
-        int maior = show.getRelease_year();
-        int tam = lista.size();
+    //retorna 1 se o primeiro for maior
+    //Primeiro ele vem tudo em season depois tudo em minutos
+    public static int durationTreatment(String duration1, String duration2){
+       if(duration1.compareToIgnoreCase(duration2) > 0){
+        return 1;
+       }else if(duration1.compareToIgnoreCase(duration2) < 0){
+            return - 1;
+       }else{
+        return 0;
+       }
+    }
 
-        for(Object obj : lista){
-            Show objShow = (Show) obj;
-            if(maior < objShow.getRelease_year()){
-                maior = objShow.getRelease_year();
+    public static int compareElements(Show show1, Show show2){
+        if(durationTreatment(show1.getDuration(), show2.getDuration()) > 0){
+            return 1;
+        }else if(durationTreatment(show1.getDuration(), show2.getDuration()) < 0){
+            return - 1;
+        }else if(durationTreatment(show1.getDuration(), show2.getDuration()) == 0){
+            if(show1.getTitle().compareToIgnoreCase(show2.getTitle()) > 0){
+                return 1;
+            }else{
+                return - 1;
             }
         }
 
-        return maior;
+        return 0;
     }
-
+    public static void intercalar(MyList lista, int esq, int meio, int dir) {
+        int n1 = meio - esq + 1;          
+        int n2 = dir - meio;             
+    
+        Show[] aux1 = new Show[n1];
+        Show[] aux2 = new Show[n2];
+    
+        for (int i = 0; i < n1; i++) {
+            aux1[i] = (Show) lista.get(esq + i);
+        }
+        for (int j = 0; j < n2; j++) {
+            aux2[j] = (Show) lista.get(meio + 1 + j);
+        }
+    
+        int i = 0, j = 0, k = esq;
+        while (i < n1 && j < n2) {
+            if (compareElements(aux1[i], aux2[j]) <= 0) {
+                lista.set(k++, aux1[i++]);
+            } else {
+                lista.set(k++, aux2[j++]);
+            }
+        }
+    
+        while (i < n1) {
+            lista.set(k++, aux1[i++]);
+        }
+        while (j < n2) {
+            lista.set(k++, aux2[j++]);
+        }
+    }
     //organizar baseado no release year
     //desempatar com title
-    public static int[] countingsort(MyList lista) {
-        int[] count = new int[getMaior(lista) + 1];
-        int[] ordenado = new int[lista.size()];
-
-        //Inicializa cada posição como zero
-        for(int i = 0; i < count.length; count[i] = 0, i++);
-
-        //Coloca em cada posição o número de elementos iguais a i
-        for(int j = 0; j < lista.size(); j++){
-            Show showObj = (Show) lista.get(j);
-            count[showObj.getRelease_year()]++;
-        }
-
-        //Adiciona no count o numero de elementos possiveis menores que i
-        for(int f = 1; f < count.length; f++){
-            count[f] += count[f-1];
-        }
-
-        //Ordena copiando array original de trás pra frente 
-        //na posição indicada pelo count
-        for(int g = lista.size() - 1; g >= 0; g--){
-            Show obj = (Show) lista.get(g);
-            ordenado[count[obj.getRelease_year()]- 1] = obj.getRelease_year();
-            count[obj.getRelease_year()]--;
-        }
-
-        return ordenado;
-
+    public static void mergesort(MyList lista, int esq, int dir) {
+        if (esq < dir){
+            int meio = (esq + dir) / 2;
+            mergesort(lista, esq, meio);
+            mergesort(lista, meio + 1, dir);
+            intercalar(lista, esq, meio, dir);
+         }
     }
 
-    public static MyList orderedByTitle(MyList entrada){
-        for(int i = 0; i < entrada.size(); i++){
-            int min = i;
-            for(int j = i + 1; j < entrada.size(); j++){
-                Show posAtual = (Show) entrada.get(j);
-                Show minShow = (Show) entrada.get(min);
-                if(posAtual.getTitle().compareTo(minShow.getTitle()) > 0){
-                    min = j;
-                }
-            }
-            if (min != i) {
-                entrada.changeElements(i, min);
-            }
-        }
-        return entrada;
-    }
 
-    public static MyList auxFix(int[] ordenado, MyList choosenShows){
-        MyList saida = new MyList();
-        MyList copia = new MyList();
-    
-        for (int i = 0; i < choosenShows.size(); i++) {
-            copia.add(choosenShows.get(i));
-        }
-    
-        for (int i = 0; i < ordenado.length; i++) {
-            int anoProcurado = ordenado[i];
-            MyList possiveis = new MyList();
-    
-            for (int j = 0; j < copia.size();) {
-                Show show = (Show) copia.get(j);
-                if (show.getRelease_year() == anoProcurado) {
-                    possiveis.add(show);
-                    copia.removeByIndex(j);  
-                } else {
-                    j++; 
-                }
-            }
-    
-            orderedByTitle(possiveis); 
-            for (int k = 0; k < possiveis.size(); k++) {
-                saida.add(possiveis.get(k));
-            }
-        }
-        return saida;
-    }
+
+   
 }
