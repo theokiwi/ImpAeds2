@@ -1,26 +1,4 @@
-class CelulaEncadeada{
-    private int elemento;
-    private CelulaEncadeada prox;
-    
-    public CelulaEncadeada(){
-        this.elemento = 0;
-        this.prox = null;
-    }
-    
-    public CelulaEncadeada(int x){
-        this.elemento = x;
-        this.prox = null;
-    }
-    }
-    
-    class ListaEncadeada{
-        private CelulaEncadeada cabeca;
-        private CelulaEncadeada ultimo;
-    }
-    
-    
-    class Celula{
-        private ListaEncadeada lista;
+class Celula{
         int elemento;
         public Celula inf, sup, esq, dir;
     
@@ -112,8 +90,8 @@ class CelulaEncadeada{
 
                 tmp.dir = nova;
                 nova.esq = tmp;
-                nova = nova.inf;
                 tmp = tmp.inf;
+                nova = nova.inf;
             }
 
             colunas++;
@@ -130,27 +108,97 @@ class CelulaEncadeada{
 
                 tmp.inf = nova;
                 nova.sup = tmp;
-                nova = nova.inf;
                 tmp = tmp.inf;
+                nova = nova.inf;
             }
 
             linhas++;
         }
 
         public void mostrar(){
-        for(Celula i = inicio; i != null; i = i.inf){
-            for(Celula j = i; j != null; j = j.dir){
-                System.out.print(j.elemento + " ");
+        if(inicio == null){
+            System.out.println("Matriz Vazia");
+        }
+        else{
+            for(Celula i = inicio; i != null; i = i.inf){
+                for(Celula j = i; j != null; j = j.dir){
+                    System.out.print(j.elemento + " ");
+                }
+                System.out.println();
             }
             System.out.println();
         }
-        System.out.println();
+        }
+
+        public void inserirPos(int elemento, int linha, int coluna){
+            int linhaAtual = 0;
+
+            for (Celula i = inicio; i != null; i = i.inf) { 
+                if (linhaAtual == linha) { 
+                    int colunaAtual = 0;
+                    for (Celula j = i; j != null; j = j.dir) { 
+                        if (colunaAtual == coluna) { 
+                            j.elemento = elemento;  
+                            return;
+                        }
+                        colunaAtual++;
+                    }
+                }
+                linhaAtual++;
+            }
+        }
+
+        public void mostrarDiagonal() {
+            if(linhas != colunas){
+                System.out.println("ERROR - Não tem diagonal principal");
+            }
+            else{
+                Celula i = inicio;
+            
+                while(i != null){
+                    System.out.print(i.elemento + " ");
+                    i = i.inf;
+                    if(i != null){
+                        i = i.dir;
+                    }
+                }
+    
+                System.out.println();
+            }
         }
         public static void main(String[] args) {
-            MatrizFlexivel m = new MatrizFlexivel(3,3);
+            System.out.println("Criando matriz 3x3 inicial:");
+            MatrizFlexivel m = new MatrizFlexivel(3, 3);
+            m.mostrar(); 
+        
+            System.out.println("Adicionando uma coluna na matriz:");
+            m.addColuna();
             m.mostrar();
+        
+            System.out.println("Adicionando uma linha na matriz:");
+            m.addLinha();
+            m.mostrar(); 
+        
+            System.out.println("Inserindo valores em posições específicas:");
+            m.inserirPos(1, 0, 0); // (Linha 0, Coluna 0)
+            m.inserirPos(2, 1, 1); // (Linha 1, Coluna 1)
+            m.inserirPos(3, 2, 2); // (Linha 2, Coluna 2)
+            m.inserirPos(4, 3, 3); // (Linha 3, Coluna 3)
+            m.mostrar(); 
+        
+            System.out.println("Mostrando diagonal principal:");
+            m.mostrarDiagonal(); 
+
+            System.out.println("Adicionando mais uma coluna e linha:");
             m.addColuna();
             m.addLinha();
+            m.mostrar(); 
+        
+            System.out.println("Inserindo valores na nova diagonal:");
+            m.inserirPos(5, 4, 4); 
             m.mostrar();
+            m.mostrarDiagonal(); 
+        
+            System.out.println("\nTestes concluídos!");
         }
     }
