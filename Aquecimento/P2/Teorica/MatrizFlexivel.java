@@ -198,7 +198,7 @@ class Celula{
             m.inserirPos(5, 4, 4); 
             m.mostrar();
             m.mostrarDiagonal(); 
-        
+            
             System.out.println("\nTestes concluídos!");
         }
     }
