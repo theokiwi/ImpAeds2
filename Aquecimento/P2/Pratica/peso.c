@@ -27,7 +27,8 @@ void freeAtletas(Atleta** atletas, int tam){
 
 void printAtletas(Atleta** atletas, int entradas){
     for(int i = 0; i < entradas; i++){
-        printf("%s %d\n", atletas[i]->nome, atletas[i]->maxPeso);
+        printf("%s %d", atletas[i]->nome, atletas[i]->maxPeso);
+        printf("\n");
     }
 }
 
