@@ -677,7 +677,6 @@ public class ArvoreBin {
                 Show elemento = (Show) obj;
                 if (elemento != null) {
                     arv.raiz = arv.inserir(arv.raiz, elemento);
-
                 }
             }
 
