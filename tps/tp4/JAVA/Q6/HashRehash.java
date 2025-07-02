@@ -614,7 +614,7 @@ class MyList implements Iterable<Object> {
 
 }
 
-public class ArvoreBinDeBin {
+public class HashRehash {
 
     public static void main(String[] args) {
         long inicio = System.nanoTime();
@@ -672,23 +672,18 @@ public class ArvoreBinDeBin {
                 }
             }
 
-            ArvoreFora arv1 = new ArvoreFora();
-
-            for (Object obj : choosenShows) {
-                Show elemento = (Show) obj;
-                arv1.raiz = arv1.inserir(arv1.raiz, elemento.getRelease_year());
-            }
-
+            TabelaHashRehash hashTable = new TabelaHashRehash();
             for (Object obj : choosenShows) {
                 Show elemento = (Show) obj;
                 if (elemento != null) {
-                    arv1.raiz.noDentro.raiz = arv1.inserirArv2(arv1.raiz, elemento);
+                    hashTable.inserir(elemento);
                 }
             }
 
             for (Object obj : titles) {
-                String titulo = (String) obj;
-                arv1.mostrar(arv1.raiz, titulo);
+                String tituloOriginal = (String) obj;
+                String tituloLower = tituloOriginal.trim().toLowerCase();
+                hashTable.consultar(tituloOriginal, tituloLower);
             }
 
             long fim = System.nanoTime();
@@ -702,152 +697,58 @@ public class ArvoreBinDeBin {
 
 }
 
-class No {
-    String elemento;
-    No esq;
-    No dir;
+class TabelaHashRehash {
+    private static final int TAM_TAB = 21;
+    private final Show[] table = new Show[TAM_TAB];
+    public int comparacoes = 0;
 
-    public No(String elemento) {
-        this.elemento = elemento;
-        esq = dir = null;
+    private int sumASCII(String s) {
+        int sum = 0;
+        for (char c : s.toCharArray()) sum += (int)c;
+        return sum;
+    }
+
+    private int h1(int sum) {
+        return sum % TAM_TAB;
+    }
+
+    private int h2(int sum) {
+        int r = (sum + 1) % TAM_TAB;
+        return (r == 0) ? 1 : r;
+    }
+
+    public void inserir(Show d) {
+        int sum = sumASCII(d.getTitle());
+        int base = h1(sum);
+        int step = h2(sum);
+        for (int i = 0; i < TAM_TAB; i++) {
+            int idx = (base + i * step) % TAM_TAB;
+            if (table[idx] == null) {
+                table[idx] = d;
+                return;
+            }
+        }
+    }
+
+    public void consultar(String orig, String lower) {
+        int sum  = sumASCII(orig);
+        int base = h1(sum);
+        int step = h2(sum);
+        boolean found = false;
+        int pos = -1;
+        for (int i = 0; i < TAM_TAB; i++) {
+            int idx = (base + i * step) % TAM_TAB;
+            comparacoes++;
+            if (table[idx] == null) {
+                break;  
+            }
+            if (table[idx].getTitle().trim().toLowerCase().equals(lower)) {
+                found = true;
+                pos = idx;
+                break;
+            }
+        }
+        if (!found) pos = base;
+        System.out.printf(" (Posicao: %d) %s\n", pos, found ? "SIM" : "NAO");
     }
 }
-
-class NoFora {
-    int elemento;
-    NoFora esq;
-    NoFora dir;
-    Arvore noDentro;
-
-    public NoFora(int elemento) {
-        this.elemento = elemento;
-        esq = dir = null;
-        noDentro = new Arvore();
-    }
-}
-
-class ArvoreFora {
-    NoFora raiz;
-
-    public ArvoreFora() {
-        raiz = new NoFora(7);
-        raiz = inserir(raiz, 3);
-        raiz = inserir(raiz, 11);
-        raiz = inserir(raiz, 1);
-        raiz = inserir(raiz, 5);
-        raiz = inserir(raiz, 9);
-        raiz = inserir(raiz, 13);
-        raiz = inserir(raiz, 0);
-        raiz = inserir(raiz, 2);
-        raiz = inserir(raiz, 4);
-        raiz = inserir(raiz, 6);
-        raiz = inserir(raiz, 8);
-        raiz = inserir(raiz, 10);
-        raiz = inserir(raiz, 12);
-        raiz = inserir(raiz, 14);
-
-    }
-
-    public NoFora inserir(NoFora raiz, int releaseYear) {
-        if (raiz == null) {
-            return new NoFora(releaseYear);
-        } else if (raiz.elemento % 15 > releaseYear % 15) {
-            raiz.esq = inserir(raiz.esq, releaseYear);
-        } else if (raiz.elemento % 15 < releaseYear % 15) {
-            raiz.dir = inserir(raiz.dir, releaseYear);
-        }
-
-        return raiz;
-    }
-
-    public NoFora pesquisa(int release_year) {
-    NoFora retorno = pesquisa(raiz, release_year);
-    return retorno;
-}
-
-    private NoFora pesquisa(NoFora raiz, int releaseYear) {
-        if (raiz == null) {
-            return null;
-        }
-        int cmp = (releaseYear % 15) - (raiz.elemento % 15);
-
-
-        if (cmp == 0) {
-            return raiz;
-        } else if (cmp < 0) {
-            return pesquisa(raiz.esq, releaseYear);
-        } else {
-            return pesquisa(raiz.dir, releaseYear);
-        }
-    }
-
-    public No inserirArv2(NoFora raiz, Show elemento){
-        NoFora partida = pesquisa(elemento.getRelease_year());
-        partida.noDentro.raiz = inserirArv2(partida.noDentro.raiz, elemento.getTitle());
-        return partida.noDentro.raiz;
-    }
-
-    public No inserirArv2(No raiz, String elemento) {
-        if (raiz == null) {
-            return new No(elemento);
-        } else if (raiz.elemento.compareTo(elemento) > 0) {
-            raiz.esq = inserirArv2(raiz.esq, elemento);
-        } else if (raiz.elemento.compareTo(elemento) < 0) {
-            raiz.dir = inserirArv2(raiz.dir, elemento);
-        }
-        return raiz;
-    }
-
-    public void mostrar (NoFora raiz, String title){
-        System.out.print("raiz ");
-        if(!caminharPre(raiz, title)){
-            System.out.print(" NAO\n");
-        }else{
-            System.out.print(" SIM\n");
-        }
-    }
-
-    public boolean caminharPre(NoFora raiz, String title) {
-    boolean achou = false;
-
-    if (raiz != null) {
-        if (pesquisaInterna(raiz.noDentro.raiz, title)) {
-            achou = true;
-        }
-
-        System.out.print(" ESQ");
-        if (caminharPre(raiz.esq, title)) {
-            achou = true;
-        }
-
-        System.out.print(" DIR");
-        if (caminharPre(raiz.dir, title)) {
-            achou = true;
-        }
-    }
-
-    return achou;
-}
-
-
-
-    private boolean pesquisaInterna(No raiz, String title) {
-        if (raiz == null) {
-            return false;
-        }
-        int cmp = title.compareTo(raiz.elemento);
-
-        if (cmp == 0) {
-            return true;
-        } else if (cmp < 0) {
-            System.out.print(" esq");
-            return pesquisaInterna(raiz.esq, title);
-        } else {
-            System.out.print(" dir");
-            return pesquisaInterna(raiz.dir, title);
-        }
-    }
-
-
-}
-

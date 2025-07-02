@@ -614,7 +614,7 @@ class MyList implements Iterable<Object> {
 
 }
 
-public class ArvoreBinDeBin {
+public class Alvinegra {
 
     public static void main(String[] args) {
         long inicio = System.nanoTime();
@@ -672,23 +672,21 @@ public class ArvoreBinDeBin {
                 }
             }
 
-            ArvoreFora arv1 = new ArvoreFora();
-
-            for (Object obj : choosenShows) {
-                Show elemento = (Show) obj;
-                arv1.raiz = arv1.inserir(arv1.raiz, elemento.getRelease_year());
-            }
-
+            Arvore arv = new Arvore();
             for (Object obj : choosenShows) {
                 Show elemento = (Show) obj;
                 if (elemento != null) {
-                    arv1.raiz.noDentro.raiz = arv1.inserirArv2(arv1.raiz, elemento);
+                    try {
+                        arv.inserir(elemento);
+                    } catch (Exception e) {
+                        System.err.println("Erro: " + e.getMessage());
+                    }
                 }
             }
 
             for (Object obj : titles) {
                 String titulo = (String) obj;
-                arv1.mostrar(arv1.raiz, titulo);
+                arv.pesquisa(titulo);
             }
 
             long fim = System.nanoTime();
@@ -702,152 +700,146 @@ public class ArvoreBinDeBin {
 
 }
 
-class No {
-    String elemento;
-    No esq;
-    No dir;
+class NoAN {
+    public Show elemento;
+    public boolean cor;
+    public NoAN esq, dir;
 
-    public No(String elemento) {
+    public NoAN(Show elemento, boolean cor) {
         this.elemento = elemento;
-        esq = dir = null;
+        this.cor = cor;
+        this.esq = this.dir = null;
     }
 }
 
-class NoFora {
-    int elemento;
-    NoFora esq;
-    NoFora dir;
-    Arvore noDentro;
+class Arvore {
+    public NoAN raiz;
 
-    public NoFora(int elemento) {
-        this.elemento = elemento;
-        esq = dir = null;
-        noDentro = new Arvore();
-    }
-}
-
-class ArvoreFora {
-    NoFora raiz;
-
-    public ArvoreFora() {
-        raiz = new NoFora(7);
-        raiz = inserir(raiz, 3);
-        raiz = inserir(raiz, 11);
-        raiz = inserir(raiz, 1);
-        raiz = inserir(raiz, 5);
-        raiz = inserir(raiz, 9);
-        raiz = inserir(raiz, 13);
-        raiz = inserir(raiz, 0);
-        raiz = inserir(raiz, 2);
-        raiz = inserir(raiz, 4);
-        raiz = inserir(raiz, 6);
-        raiz = inserir(raiz, 8);
-        raiz = inserir(raiz, 10);
-        raiz = inserir(raiz, 12);
-        raiz = inserir(raiz, 14);
-
+    public Arvore() {
+        raiz = null;
     }
 
-    public NoFora inserir(NoFora raiz, int releaseYear) {
+    public void inserir(Show elemento) throws Exception {
         if (raiz == null) {
-            return new NoFora(releaseYear);
-        } else if (raiz.elemento % 15 > releaseYear % 15) {
-            raiz.esq = inserir(raiz.esq, releaseYear);
-        } else if (raiz.elemento % 15 < releaseYear % 15) {
-            raiz.dir = inserir(raiz.dir, releaseYear);
-        }
-
-        return raiz;
-    }
-
-    public NoFora pesquisa(int release_year) {
-    NoFora retorno = pesquisa(raiz, release_year);
-    return retorno;
-}
-
-    private NoFora pesquisa(NoFora raiz, int releaseYear) {
-        if (raiz == null) {
-            return null;
-        }
-        int cmp = (releaseYear % 15) - (raiz.elemento % 15);
-
-
-        if (cmp == 0) {
-            return raiz;
-        } else if (cmp < 0) {
-            return pesquisa(raiz.esq, releaseYear);
+            raiz = new NoAN(elemento, false);
         } else {
-            return pesquisa(raiz.dir, releaseYear);
+            inserir(elemento, null, null, null, raiz);
+        }
+        raiz.cor = false;
+    }
+
+    private void inserir(Show elemento, NoAN bisavo, NoAN avo, NoAN pai, NoAN i) throws Exception {
+        if (i == null) {
+            if (elemento.getTitle().compareTo(pai.elemento.getTitle()) < 0) {
+                i = pai.esq = new NoAN(elemento, true);
+            } else {
+                i = pai.dir = new NoAN(elemento, true);
+            }
+
+            if (pai.cor == true) {
+                balancear(bisavo, avo, pai, i);
+            }
+
+        } else {
+            if (i.esq != null && i.dir != null && i.esq.cor && i.dir.cor) {
+                i.cor = true;
+                i.esq.cor = false;
+                i.dir.cor = false;
+
+                if (i == raiz) {
+                    i.cor = false;
+                } else if (pai.cor) {
+                    balancear(bisavo, avo, pai, i);
+                }
+            }
+
+            int cmp = elemento.getTitle().compareTo(i.elemento.getTitle());
+            if (cmp < 0) {
+                inserir(elemento, avo, pai, i, i.esq);
+            } else if (cmp > 0) {
+                inserir(elemento, avo, pai, i, i.dir);
+            } else {
+                throw new Exception("Erro: elemento repetido!");
+            }
         }
     }
 
-    public No inserirArv2(NoFora raiz, Show elemento){
-        NoFora partida = pesquisa(elemento.getRelease_year());
-        partida.noDentro.raiz = inserirArv2(partida.noDentro.raiz, elemento.getTitle());
-        return partida.noDentro.raiz;
-    }
+    private void balancear(NoAN bisavo, NoAN avo, NoAN pai, NoAN i) {
+        if (pai.cor == true) {
+            if (pai.elemento.getTitle().compareTo(avo.elemento.getTitle()) > 0) {
+                if (i.elemento.getTitle().compareTo(pai.elemento.getTitle()) > 0) {
+                    avo = rotacaoEsq(avo);
+                } else {
+                    avo = rotacaoDirEsq(avo);
+                }
+            } else {
+                if (i.elemento.getTitle().compareTo(pai.elemento.getTitle()) < 0) {
+                    avo = rotacaoDir(avo);
+                } else {
+                    avo = rotacaoEsqDir(avo);
+                }
+            }
 
-    public No inserirArv2(No raiz, String elemento) {
-        if (raiz == null) {
-            return new No(elemento);
-        } else if (raiz.elemento.compareTo(elemento) > 0) {
-            raiz.esq = inserirArv2(raiz.esq, elemento);
-        } else if (raiz.elemento.compareTo(elemento) < 0) {
-            raiz.dir = inserirArv2(raiz.dir, elemento);
+            if (bisavo == null) {
+                raiz = avo;
+            } else if (avo.elemento.getTitle().compareTo(bisavo.elemento.getTitle()) < 0) {
+                bisavo.esq = avo;
+            } else {
+                bisavo.dir = avo;
+            }
+
+            avo.cor = false;
+            avo.esq.cor = avo.dir.cor = true;
         }
-        return raiz;
     }
 
-    public void mostrar (NoFora raiz, String title){
-        System.out.print("raiz ");
-        if(!caminharPre(raiz, title)){
+    private NoAN rotacaoEsq(NoAN no) {
+        NoAN resp = no.dir;
+        no.dir = resp.esq;
+        resp.esq = no;
+        return resp;
+    }
+
+    private NoAN rotacaoDir(NoAN no) {
+        NoAN resp = no.esq;
+        no.esq = resp.dir;
+        resp.dir = no;
+        return resp;
+    }
+
+    private NoAN rotacaoEsqDir(NoAN no) {
+        no.esq = rotacaoEsq(no.esq);
+        return rotacaoDir(no);
+    }
+
+    private NoAN rotacaoDirEsq(NoAN no) {
+        no.dir = rotacaoDir(no.dir);
+        return rotacaoEsq(no);
+    }
+
+    public void pesquisa(String title) {
+        System.out.print("=>raiz");
+        boolean achou = pesquisa(raiz, title);
+        if (!achou) {
             System.out.print(" NAO\n");
-        }else{
-            System.out.print(" SIM\n");
         }
     }
 
-    public boolean caminharPre(NoFora raiz, String title) {
-    boolean achou = false;
-
-    if (raiz != null) {
-        if (pesquisaInterna(raiz.noDentro.raiz, title)) {
-            achou = true;
-        }
-
-        System.out.print(" ESQ");
-        if (caminharPre(raiz.esq, title)) {
-            achou = true;
-        }
-
-        System.out.print(" DIR");
-        if (caminharPre(raiz.dir, title)) {
-            achou = true;
-        }
-    }
-
-    return achou;
-}
-
-
-
-    private boolean pesquisaInterna(No raiz, String title) {
+    private boolean pesquisa(NoAN raiz, String title) {
         if (raiz == null) {
             return false;
         }
-        int cmp = title.compareTo(raiz.elemento);
+        int cmp = title.compareTo(raiz.elemento.getTitle());
 
         if (cmp == 0) {
+            System.out.print(" SIM\n");
             return true;
         } else if (cmp < 0) {
             System.out.print(" esq");
-            return pesquisaInterna(raiz.esq, title);
+            return pesquisa(raiz.esq, title);
         } else {
             System.out.print(" dir");
-            return pesquisaInterna(raiz.dir, title);
+            return pesquisa(raiz.dir, title);
         }
     }
-
-
 }
-
